@@ -7,6 +7,11 @@ from activations import *
 
 class Model:
     def __init__(self, inputs, outputs, name: str = "model") -> None:
+        if inputs.output_shape != outputs.output_shape:
+            raise ValueError(
+                f"Input and output shapes do not match: {inputs.output_shape} != {outputs.output_shape}"
+            )
+
         self.inputs = inputs
         self.outputs = outputs
         self.id_to_layer = {}
@@ -37,3 +42,12 @@ class Model:
             r += f"{self.id_to_layer[i]}\n"
 
         return r
+
+    def __forward(self, inputs):
+        for i in range(self.layers_count):
+            inputs = self.id_to_layer[i].predict(inputs)
+
+        return inputs
+
+    def predict(self, inputs):
+        return self.__forward(inputs)

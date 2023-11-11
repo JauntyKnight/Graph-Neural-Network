@@ -18,7 +18,6 @@ class Layer:
             raise ValueError("No input layers provided")
 
         self.parent_layers.extend(input_layers)
-        print(input_layers)
         for layer in input_layers:
             layer.child_layers.append(self)
 
@@ -77,21 +76,20 @@ class Dense(Layer):
 
         if self.use_bias:
             self.b = np.random.randn(self.units).astype(self.dtype)
+        else:
+            self.b = np.zeros(self.units).astype(self.dtype)
 
     def call(self, inputs):
-        return np.matmul(inputs, self.w) + self.b
+        return inputs @ self.w + self.b
 
     # used for Functional construction of the model
     def __call__(self, *input_layers):
-        self.build(input_layers[0].output_shape)  # TODO: fix input_shape
+        self.build(input_layers[0].output_shape)  # TODO: check input_shape
         self._compute_output_shape(input_layers[0].output_shape)
         return super().__call__(*input_layers)
 
     def _compute_output_shape(self, input_shape):
         self.output_shape = (input_shape[0], self.units)
 
-    def fit(self, state, target):
-        pass
-
-    def predict(self, state):
-        pass
+    def predict(self, inputs):
+        return self.call(inputs)
