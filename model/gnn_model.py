@@ -35,3 +35,6 @@ class GNN(Model):
 
     def predict(self, state):
         pass
+
+    def save(self, path):
+        pass
