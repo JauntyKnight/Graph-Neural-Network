@@ -10,6 +10,7 @@ class Activation(Layer):
         self.activation = activation
         self.activation_fn = self._get_activation_fn(activation)
         self.output_shape = None
+        self.output = None
 
     def __call__(self, *input_layers):
         if len(input_layers) != 1:
@@ -23,21 +24,32 @@ class Activation(Layer):
     def _get_activation_fn(self, activation: Union[str, Callable]) -> Callable:
         if activation == "relu":
             return lambda x: np.maximum(x, 0)
-        elif activation == "sigmoid":
+        if activation == "sigmoid":
             return lambda x: 1 / (1 + np.exp(-x))
-        elif activation == "tanh":
+        if activation == "tanh":
             return lambda x: np.tanh(x)
-        elif activation == "softmax":
+        if activation == "softmax":
             return lambda x: np.exp(x) / np.sum(np.exp(x), axis=-1, keepdims=True)
-        elif activation is None:
+        if activation is None:
             return lambda x: x
-        elif callable(activation):
+        if callable(activation):
             return activation
-        else:
-            raise ValueError(f"Unknown activation: {activation}")
+
+        raise ValueError(f"Unknown activation: {activation}")
 
     def predict(self, inputs):
-        return self.activation_fn(inputs)
+        self.output = self.activation_fn(inputs)
+        return self.output
 
-    def apply_gradients(self, gradients):
-        pass
+    def _apply_gradients(self, gradients):
+        if self.activation == "relu":
+            return gradients * (self.output > 0)
+        # TODO: check if this is correct
+        if self.activation == "sigmoid":
+            return gradients * self.output * (1 - self.output)
+        if self.activation == "tanh":
+            return gradients * (1 - self.output**2)
+        if self.activation == "softmax":
+            return gradients * self.output * (1 - self.output)
+        if self.activation is None:
+            return gradients

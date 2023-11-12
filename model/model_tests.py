@@ -27,7 +27,9 @@ test_topological()
 def test_predict_transition():
     inputs = Input(shape=(2, 2), name="input")
     x = Dense(2, name="dense1")(inputs)
+    x = Activation("relu", name="relu")(x)
     x = Dense(2, name="dense2")(x)
+    # x = Activation("sigmoid", name="sigmoid")(x)
     outputs = Dense(2, name="output")(x)
 
     model = TransitionFunction(inputs, outputs, verbose=True)

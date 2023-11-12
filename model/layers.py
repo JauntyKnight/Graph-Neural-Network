@@ -47,12 +47,14 @@ class Input(Layer):
         super().__init__(trainable, name, dtype)
         self.shape = shape
         self._compute_output_shape(shape)
+        self.outputs = None
 
     def predict(self, inputs):
+        self.outputs = inputs
         return inputs
 
-    def apply_gradients(self, gradients):
-        pass
+    def _apply_gradients(self, gradients):
+        return gradients
 
     def _compute_output_shape(self, input_shape):
         self.output_shape = input_shape
@@ -70,9 +72,15 @@ class Dense(Layer):
         super().__init__(trainable, name, dtype)
         self.units = units
         self.use_bias = use_bias
+        self.w = None
+        self.b = None
+        self.outputs = None
 
     def build(self, input_shape):  # initialize weights and biases
-        self.w = np.random.randn(input_shape[-1], self.units).astype(self.dtype)
+        # use He initialization
+        self.w = np.random.randn(input_shape[-1], self.units).astype(self.dtype) * np.sqrt(
+            2 / input_shape[-1]
+        )
 
         if self.use_bias:
             self.b = np.random.randn(self.units).astype(self.dtype)
@@ -92,4 +100,16 @@ class Dense(Layer):
         self.output_shape = (input_shape[0], self.units)
 
     def predict(self, inputs):
-        return self.call(inputs)
+        self.outputs = self.call(inputs)
+        return self.outputs
+
+    def apply_gradients(self, gradients, learning_rate=0.01):
+        if self.trainable:
+            to_return = gradients @ self.w.T
+            if self.use_bias:
+                self.b -= learning_rate * np.sum(gradients, axis=0)
+            self.w -= learning_rate * np.outer(self.parent_layers[0].outputs, gradients)
+
+            return to_return
+
+        return gradients
