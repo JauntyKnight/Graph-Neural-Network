@@ -29,7 +29,7 @@ class Layer:
     def _compute_output_shape(self, input_shape):
         raise NotImplementedError
 
-    def apply_gradients(self, gradients):
+    def apply_gradients(self, gradients, learning_rate=0.01):
         raise NotImplementedError
 
     def __repr__(self) -> str:

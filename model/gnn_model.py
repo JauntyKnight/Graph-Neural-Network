@@ -17,7 +17,7 @@
 ###
 
 
-from model import Model
+from networks import Model
 
 import numpy as np
 

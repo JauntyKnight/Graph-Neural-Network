@@ -2,7 +2,6 @@ import numpy as np
 from typing import Iterable, List, Tuple, Union
 
 from layers import *
-from activations import *
 
 
 class Model:
@@ -50,6 +49,8 @@ class Model:
         return r
 
     def __forward(self, inputs):
+        # TODO: move away from a feed-forward approach
+        # and use the topological order to compute the outputs
         for i in range(self.layers_count):
             inputs = self.id_to_layer[i].predict(inputs)
 
