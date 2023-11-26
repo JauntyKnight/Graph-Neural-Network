@@ -154,3 +154,14 @@ cython_debug/
 
 # PyCharm
 .idea/
+
+# tex
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
