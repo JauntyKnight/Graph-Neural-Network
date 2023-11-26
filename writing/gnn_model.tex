@@ -95,7 +95,7 @@
     , where $l_v$, $l_{N(v)}$, $l_{E(v)}$ are the labels of $v$, $N(v)$, $E(v)$, respectively, stacked together,
     and $x_{N(v)}$ the states of the neighbors of $v$, stacked.
 
-    \begin{figure}[h]
+    \begin{figure}[t]
         \centering
         \includegraphics[width=0.7\textwidth]{img/A-graph-and-the-neighborhood-of-a-node-The-state-x-1-of-node-1-depends-on-the.png}
         \caption{A graph and the neighborhood of a node. The state $x_1$ of node 1 depends on the states of its neighbors, $x_2$, $x_3$, $x_4$, and $x_6$.}
@@ -116,8 +116,38 @@
         o = G_w(x, l_V)
     \end{equation}
     , and we therefore call $F_w$ and $G_w$ the \textbf{\textit{global transition function}} and \textbf{\textit{global output function}}, respectively.
+    \\
+    \indent Naturally, we are only interested in the cases when $o$, and therefore $x$, are uniquelly defined, so that $\varphi$
+    is indeed a function. While it is obvious that any feed-forward neural network satisfies this condition for $G_w$, it isn't
+    by far the case for $F_w$, because of its recursive nature. Nevertheless, the Banach fixed-point theorem guarantees us that
+    a uniquelly defined $x$ can be achieved, provided that $F_w$ is a contraction mapping, i.e. 
+    $\exists \mu \in [0, 1) \forall x, y \in \mathbb{R}^s : ||F_w(x) - F_w(y)|| \leq \mu ||x - y||$. [reference to be inserted here, so far it is Wikipedia :-)]
+    \\
+    \indent The Banach fixed-point theorem also conveniently provides us with an iterative algorithm for 
+    computing $x$, which converges exponentially fast for any $x(0) \in \mathbb{R}^s$:
+    \begin{equation}
+        x(t + 1) = F_w(x(t), l_V, l_E)
+    \end{equation}
+    , where $x(t)$ is the state of the vertices at the $t$-th iteration, and $x(0)$ is $l_V$ (my understanding, it is actually never mentioned in the paper what precisely is $x(0)$).
+    Also I believe we can have yet another function, $H_w$ (which would be a straightforward MLP) that computes $x(0)$ in one step, namely $x = H_w(l_V, l_E)$, i.e. would map the labels to a higher-dimensional space. I'll experiment with this once I have the basic model working. 
 
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.9\textwidth]{img/An-illustration-of-the-iterative-process-of-the-GNN-model-The-state-of-each-node.png}
+        \caption{An illustration of the iterative process of the GNN model. The state of each node is computed by the local transition function $f_w$ using the states of its neighbors.}
+        \label{fig:iterative_process}
+    \end{figure}
 
+    Thus, the model behaves as follows:
+    \begin{enumerate}
+        \item The labels of the vertices and edges are mapped to a higher-dimensional space by $H_w$. (hypothesis / optional). Otwerwise, $x(0) = l_V$.
+        \item The states of the vertices are computed iteratively by $F_w$, until convergence. Namely, for the time step $t+1$, we take for each vertex $v$ its state at the time step $t$, and the states of its neighbors at the time step $t$, $x_v(t)$, and of its neighbors, $x_{N(v)}(t)$, and compute $x_v(t+1) = f_w(x_v(t), x_{N(v)}(t))$. At any given time step. $f_w$ is applied simulataniously to all vertices.
+        \item Repeat the previous step until convergence. I.e. for a hyperparameter $\epsilon > 0$, stop when $||x(t+1) - x(t)|| < \epsilon$. Let $x$ be the resulting, final state.
+        \item Compute the output of each vertex by $G_w$, i.e. $o_v = g_w(x_v, l_v)$.
+        \item Update the parameters of $F_w$, $G_w$, and $H_w$ by backpropagation.
+    \end{enumerate}
+
+\section{Backpropagation}
     
 
 % Results
