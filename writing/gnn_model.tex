@@ -10,7 +10,7 @@
 \begin{document}
 
 % Title and author information
-\title{Graph Neural Network Model}
+\title{The Graph Neural Network Model}
 
 \maketitle
 
@@ -50,8 +50,8 @@
     
     While providing the definitions, we will stick to unweighted and undirected, i.e.
     simple,  graphs.  The model can be easily extended to other cases.
-    For a vertex $v \in V$, the set $N(v) = \{u \in V : (u, v) \in E\}$ is called the
-    neighborhood  of  $v$. The  degree  of  a  vertex  $v$  is  $|N(v)|$,  i.e. the
+    For a vertex $v \in V$, the set $N(v) = \{u \in V | (u, v) \in E\}$ is called the
+    neighborhood  of  $v$, while $E(v) = \{(u, v) \in E\}$. The  degree  of  a  vertex  $v$  is  $|N(v)|$,  i.e. the
     number  of  vertices  adjacent  to  $v$.
     \\
 
@@ -80,7 +80,45 @@
     \indent The underlying intuitive idea of this algorithm is that in a graph, vertices are representing object, data points, etc.,
     while the edges are representing the relationships between them. Therefore, the representation of a vertex should depend on the
     representations of its neighbors. To mimic this, we will attach a \textbf{\textit{state}} to each vertex, 
-    $x_v \in \mathbb{R}^s$, which is encodes information contained in $N(v)$.
+    $x_v \in \mathbb{R}^s$, which is encodes information contained in $N(v)$, and is used to compute an 
+    \textbf{\textit{output}} $o_v \in \mathbb{R}^m$, s.t. $o_v \approx t_v$.
+    \\
+    \indent It is natural to express the dependence of $x_v$ on its neighbors as a function, so let 
+    $f_w$ be a parametric function, called \textbf{\textit{local transition function}}.
+    Similarly, let $g_w$ be the \textbf{\textit{local output function}}. Then, the state and output of a vertex $v$ are computed as follows:
+    \begin{equation}
+        x_v = f_w(l_v, l_{N(v)}, l_{E(v)}, x_{N(v)})
+    \end{equation}
+    \begin{equation}
+        o_v = g_w(x_v, l_v)
+    \end{equation}
+    , where $l_v$, $l_{N(v)}$, $l_{E(v)}$ are the labels of $v$, $N(v)$, $E(v)$, respectively, stacked together,
+    and $x_{N(v)}$ the states of the neighbors of $v$, stacked.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{img/A-graph-and-the-neighborhood-of-a-node-The-state-x-1-of-node-1-depends-on-the.png}
+        \caption{A graph and the neighborhood of a node. The state $x_1$ of node 1 depends on the states of its neighbors, $x_2$, $x_3$, $x_4$, and $x_6$.}
+        \label{fig:local_functions}
+    \end{figure}
+
+    \indent It is worth noting, nevertheless, that the use of $l_{N(v)}$ and $l_{E(v)}$ may be considered redundant,
+    as $x_{N(v)}$ already encodes this information, while $l_v$ is contained in $x_v$ for $g_w$. This would be just a similar
+    definition to $f_w$ and $g_w$.
+    \\
+    \indent Let $x$, $o$, $l_V$, and $l_E$ be the vectors constructed by stacking $x_v$, $o_v$, $l_v$, and $l_{(v, u)}$ respectively, for all $v \in V$
+    and $(v, u) \in E$.
+    Then, (1) and (2) can be rewritten as:
+    \begin{equation}
+        x = F_w(x, l_V, l_E)
+    \end{equation}
+    \begin{equation}
+        o = G_w(x, l_V)
+    \end{equation}
+    , and we therefore call $F_w$ and $G_w$ the \textbf{\textit{global transition function}} and \textbf{\textit{global output function}}, respectively.
+
+
+    
 
 % Results
 \section{Results}
