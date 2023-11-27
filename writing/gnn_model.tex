@@ -4,6 +4,7 @@
 \usepackage{setspace}
 \usepackage{graphicx}
 \usepackage{mathbbol}
+\usepackage{mathtools}
 \doublespacing
 \boldmath
 
@@ -11,6 +12,7 @@
 
 % Title and author information
 \title{The Graph Neural Network Model}
+\date{\vspace{-5ex}}
 
 \maketitle
 
@@ -148,15 +150,33 @@
     \end{enumerate}
 
 \section{Backpropagation}
+
+    \indent The model is trained with the help of the well known backpropagation algorithm. The mean squared error between the target labels and the outputs of the model, i.e. $L = \frac{1}{|V|} \sum_{v \in V} ||o_v - t_v||^2$ is usually adopted as the loss function (worth experimenting with other loss functions). The parameters of the model are updated by gradient descent, i.e. $\theta \leftarrow \theta - \alpha \nabla_\theta L$, where $\theta$ is the set of all parameters of the model, and $\alpha$ is the learning rate.
+    
+    \indent However, since we require $F_w$ to be a contraction mapping, we modify a given loss function by adding a penalty term to it: [reference needed]
+    \begin{equation*}    
+        L'(y) = 
+        \begin{dcases*}
+            (y - \mu)^2 & \text{if} $y > \mu$ \\
+            0           & \text{otherwise}
+        \end{dcases*}
+    \end{equation*}
+
+    And the final loss function is:
+    \begin{equation}
+        L = \frac{1}{|V|} \sum_{v \in V} ||o_v - t_v||^2 + \beta L'(|| {{\partial F_w} \over {\partial x} } ||)
+    \end{equation}
+    , where $\beta$ is a hyperparameter, $|| {{\partial F_w} \over {\partial x} } ||$ is the L2 norm of the gradient of $F_w$ with respect to $x$, and $\mu$ is a hyperparameter, the desired contraction factor of $F_w$.
+    \\
+
+    \indent The fact that $F_w$ is also a recursive function poses a challenge for the backpropagation algorithm, as it is not straightforward to compute the gradient of $L$ with respect to $x$. The most straightforward way to do this would be to unwind the recursion, and compute the gradient of $L$ with respect to $x$ as a sum of the gradients of $L$ with respect to $x(t)$, for all $t$.
+    However, not only this would be highly inefficient, both in terms of memory and time (since we would have to store the states of all vertices at all time steps), but also it poses us to other risks, such as the vanishing or exploding gradient problem.
+    As an alternative, Scarselli et al. \cite{scarselli2009graph}, inspired by the Almeida-Pineda recurrent backpropagation algorithm [citation TBA], propose a more efficient way to compute the gradient of $L$ with respect to $x$.
+    I won't describe it here for now, (yet I can prove every step of the equations they have in the paper),
+    but the idea behind it is that $|| {{\partial F_w} \over {\partial x} } ||$ is accumulated over time in some variable $z$, which is also computed iteratively until convergence.
     
 
-% Results
-\section{Results}
-This is the results section of your article.
 
-% Conclusion
-\section{Conclusion}
-This is the conclusion section of your article.
 
 % References
 \begin{thebibliography}{9}
